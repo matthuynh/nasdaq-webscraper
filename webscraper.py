@@ -42,11 +42,11 @@ class Webscraper:
             d[items[i]] = items[i+1].replace(',','')
         # print(d)
     
-        print('Elapsed time: ' + str(time.time() - start_time))
+        # print('Elapsed time: ' + str(time.time() - start_time))
         return d
 
     # Retrieves data from NASDAQ Income Statement Page
-    def get_data_nasdaq_income_statement(self, ticker: str) -> tuple:
+    def get_data_nasdaq_income_statement(self, ticker: str) -> list:
         start_time = time.time()
         url = 'https://www.nasdaq.com/symbol/'+ ticker + \
             '/financials?query=income-statement'
@@ -83,10 +83,10 @@ class Webscraper:
         # This pattern matches all the 
         matches = pattern.findall(text)
         # print(matches)
-        print('There is income statement data for ' + str(len(matches)) + \
-              ' years')
+        # print('There is income statement data for ' + str(len(matches)) +' years')
         if (len(matches) % 4 != 0) or (len(matches) == 0):
-            print('Incomplete income statement info. View webscraper.py (years regex)')    
+            print('Incomplete income statement info. Your ticker may not be valid, \
+                  or income statement data may not exist yet for your ticker.')    
         else:
             # Adds data to the list
             year1.append(matches[0])
@@ -101,8 +101,8 @@ class Webscraper:
         # Adds income statement values into appropiate year lists
         # WARNING: THIS ASSUMES THE COMPANY HAS INCOME STATEMENT INFORMATION FOR ALL 4 YEARS
         if (len(matches) % 4 != 0) or (len(matches) == 0):
-            print('Incomplete income statement info. View webscraper.py \
-            (values regex)')
+            print('Incomplete income statement info. Your ticker may not be valid, \
+                  or income statement data may not exist yet for your ticker.')
         else:
             # Adds data to the lists
             counter = 0
@@ -113,18 +113,41 @@ class Webscraper:
                 year3.append(matches[counter+2])
                 year4.append(matches[counter+3])
                 counter += 4
-        print('Successfully stored income statement information')
+        # print('Successfully stored income statement information')
         # print(len(year1))
         
-        print('Elapsed time: ' + str(time.time() - start_time))
-        return_tuple = (year1, year2, year3, year4)
-        return return_tuple
+        # print('Elapsed time: ' + str(time.time() - start_time))
+        return_list = (year1, year2, year3, year4)
+        return return_list
          
 
+def display_income_statement_data(list):
+    data = webscraper.get_data_nasdaq_income_statement(ticker)
+    legend = ['Period Ending', 'Total Revenue', 'Gross Profit',\
+                  'Research and Development' , 'Sales, General, and Admin,', \
+                  'Non-Recurring Items', 'Other operating items', \
+                  'Operating income', 'Addtnl income/expense items', \
+                  'Earnings before interest and tax', 'Interest Expense', \
+                  'Earnings Before Tax', 'Income Tax', 'Minority Interest', \
+                  'Equity Earnings/Loss Unconsolidated Subsidiary', \
+                  'Net income-cont. operations', 'Net income', \
+                  'Net income appplicable to common shareholders']
+    for i in range(len(data[0]) - 1):
+        print(legend[i])
+        print(data[0][i])
+        print(data[1][i])
+        print(data[2][i])
+        print(data[3][i])
+    
 if __name__ == '__main__':
     webscraper = Webscraper()
-    ticker = input("Type the stock ticker: ")
-    d1 = webscraper.get_data_nasdaq_summary(ticker)
-    d2 = webscraper.get_data_nasdaq_income_statement(ticker)
-    
+    print('Welcome! Start by typing in a stock ticker, such as AAPL, and then pressing enter');
+    ticker = input("Type a stock ticker or type :q to exit: ")
+    while(ticker != ":q"):
+        print('Stock Summary: ')
+        print(webscraper.get_data_nasdaq_summary(ticker))
+        print('Income Statement Data: ')
+        display_income_statement_data(webscraper.get_data_nasdaq_income_statement(ticker))
+        print('\n')
+        ticker = input("Type a stock ticker or type :q to exit: ")
     
